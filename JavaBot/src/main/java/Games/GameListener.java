@@ -135,8 +135,9 @@ public class GameListener extends ListenerAdapter {
              List<Player> playerBoard = Arrays.stream(PLayerData.getAllPlayers("21")).sorted(Comparator.comparingLong(Player::getMoney))
                     .toList();
              String output ="";
+             int count =1;
              for(int i = playerBoard.size()-1; i >=0; i--){
-                 output+=(i+1+ ") "+ playerBoard.get(i).getName()+" Bakiye: "+playerBoard.get(i).getMoney()+"\n");
+                 output+=((count++)+ ") "+ playerBoard.get(i).getName()+" Bakiye: "+playerBoard.get(i).getMoney()+"\n");
              }
              channel.sendMessage(output).queue();
 
