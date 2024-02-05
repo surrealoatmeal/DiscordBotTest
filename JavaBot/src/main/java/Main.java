@@ -1,8 +1,7 @@
 import Commands.CheguListener;
-import Games.DiceRoll;
 
 
-import Games.GameListener;
+import Games.GameMessageListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -14,7 +13,7 @@ public class Main {
         JDA bot = builder.build();
         builder.enableIntents(GatewayIntent.MESSAGE_CONTENT);
         builder.addEventListeners(new CheguListener());
-        builder.addEventListeners(new GameListener());
+        builder.addEventListeners(new GameMessageListener());
 
 
         try {

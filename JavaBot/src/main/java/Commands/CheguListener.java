@@ -17,7 +17,7 @@ public class CheguListener extends ListenerAdapter {
 
         if(s.toLowerCase().contains("ali rasim")){
             MessageChannel channel = event.getChannel();
-            channel.sendMessage("Orospuevladi.").queue();
+            channel.sendMessage("```Penguen```").queue();
             return;
         }
     }

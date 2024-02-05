@@ -1,0 +1,159 @@
+package Games;
+
+import FileManagement.PLayerData;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
+
+public class RockPaperScissors extends Game{
+    private PLayerData pLayerData;
+    private Player player;
+    //challenger, challenger, accepted
+
+
+    //challenger, challenged, bet
+    public static List<Bets> betsAndChallenges = new ArrayList<>();
+
+    public RockPaperScissors(User InitiatorUser, MessageReceivedEvent event){
+        super(InitiatorUser);
+
+        pLayerData = new PLayerData(event.getAuthor());
+        this.player = super.getPlayer();
+    }
+    public void accept(User challenger, Message m){ //accepter cagiriyor
+        Player challengerPlayer = new Player(challenger);
+        MessageChannel channel = m.getChannel();
+        if(checkChallenge(challenger, m.getAuthor())){
+            Bets bet =getBet(challenger, m.getAuthor());
+            long challengerBalance = challengerPlayer.getMoney();
+            long challengedBalance = player.getMoney();
+            long amount = bet.getStandingBet();
+            if(challengedBalance-amount<0){
+                channel.sendMessage("Yetersiz bakiye.").queue();
+                return;
+            }
+            if(challengerBalance-amount<0){
+                channel.sendMessage(challenger.getName() +" kisisi yeterli paraya sahip degil.").queue();
+                return;
+            }
+            play(challenger, m, amount);
+            return;
+        }
+        channel.sendMessage("<@"+challenger.getId()+"> ile herhangi bir iddia mevcut degil.").queue();
+    }
+    public void challenge(User challenged, long amount, Message m){
+        MessageChannel channel = m.getChannel();
+        if(player.getId().equals(challenged.getId())){
+            channel.sendMessage("Kendinizi duelloya cagiramazsiniz!").queue();
+            return;
+        }
+        PLayerData challengedData = new PLayerData(challenged);
+        long challengedBalance =challengedData.getPLayerData().getMoney();
+        long playerBalance = getPlayer().getMoney();
+        String challengedId = challenged.getId();
+        if(playerBalance-amount<0){
+            channel.sendMessage("Yetersiz bakiye.").queue();
+            return;
+        }
+        if(challengedBalance-amount<0){
+            channel.sendMessage(challenged.getName() +" kisisi yeterli paraya sahip degil.").queue();
+            return;
+        }
+        addChallenge(m.getAuthor(), challenged, amount);
+        channel.sendMessage("<@"+player.getId()+"> kisisi <@"+challengedId
+                +"> kisisini tas kagit makas oynamaya cagiriyor!\n" +
+                "Aktif bahis: " +amount).queue();
+    }
+    public static boolean checkChallenge(User Challenger, User Challenged){
+        return betsAndChallenges.stream()
+                .anyMatch(bac -> bac.getChallengerID().equals(Challenger.getId())
+                        &&bac.getChallengedID().equals(Challenged.getId()));
+    }
+    public static void addChallenge(User challenger, User challenged, long bet){
+         //displays whether the challenged player and the bet
+        if(checkChallenge(challenger, challenged)){
+            betsAndChallenges.stream().filter(bac-> checkChallenge(challenger, challenged))
+                    .forEach(bac-> bac.setStandingBet(bet));
+        }else{
+            betsAndChallenges.add(new Bets(challenger.getId(), challenged.getId(), bet));
+        }
+    }
+    public static Bets getBet(User challenger, User challenged){
+        if(checkChallenge(challenger, challenged)){
+        return betsAndChallenges.stream()
+                .filter(bac -> bac.getChallengerID().equals(challenger.getId())
+                        && bac.getChallengedID().equals(challenged.getId()))
+                .findFirst().get();
+        }
+        throw new NullPointerException("No challenges exist with the given parameters! getBet();");
+    }
+
+    public void play(User challenger, Message m, long bet){
+        PLayerData challengerData = new PLayerData(challenger); //to load the files
+        Player challengerPLayer = new Player(challenger);
+        long challengerBalance = challengerPLayer.getMoney();
+        long challengedBalance = player.getMoney();
+
+        String[] rps = new String[]{":rock:", ":scroll:", ":scissors:"};
+        MessageChannel channel = m.getChannel();
+        //subtract balance
+        challengerBalance=challengerBalance -bet;
+        challengedBalance =challengedBalance-bet;
+        challengerData.logData(challengerPLayer);
+        pLayerData.logData(player);
+        int challengerTurn = new Random().nextInt(0,2);
+        int challengedTurn = new Random().nextInt(0,2);
+
+        EmbedBuilder eb = new EmbedBuilder();
+        String outputMessage = "**"+challengerPLayer.getName()+ "** "+rps[challengerTurn] +" yapti!\n**" +
+                player.getName()+"** "+ rps[challengedTurn]+" yapti!\n";
+        if(challengedTurn==challengerTurn){
+            eb.setTitle("**BERABERE!**");
+        }else if(gameResult(challengerTurn, challengedTurn)){
+            challengedBalance =challengedBalance +2*bet;
+            eb.setTitle("**"+challengerPLayer.getName()+ " KAZANDI!**\n").setColor(Color.MAGENTA);
+        }else{
+            challengerBalance =challengerBalance + 2*bet;
+            eb.setTitle("**"+player.getName()+ " KAZANDI!**\n").setColor(Color.MAGENTA);
+        }
+        player.setMoney(challengedBalance);
+        challengerPLayer.setMoney(challengerBalance);
+        challengerData.logData(challengerPLayer);
+        pLayerData.logData(player);
+        eb.setDescription(outputMessage+ "**"+challenger.getName() +"** yeni bakiye: **" +challengerBalance +"**\n" +
+                "**"+player.getName() +"**  yeni bakiye: **" +challengedBalance +"**");
+        channel.sendMessageEmbeds(eb.build()).queue();
+        eb.clear();
+    }
+    private boolean gameResult(int challenger, int challenged){
+        //true if challenged wins, false if challenged looses
+        return challenger != challenged % 2;
+    }
+
+    //GETTER AND SETTER
+
+    public PLayerData getpLayerData() {
+        return pLayerData;
+    }
+
+    public void setpLayerData(PLayerData pLayerData) {
+        this.pLayerData = pLayerData;
+    }
+
+    @Override
+    public Player getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
+}

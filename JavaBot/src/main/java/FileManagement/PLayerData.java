@@ -14,9 +14,8 @@ public class PLayerData {
     private Player playerData = null;
     private File logFilePath;
 
-    public PLayerData(User user, String gameName){
-        File logDirectory = new File(Paths.get("").toAbsolutePath()+File.separator +"PlayerDatas"
-                +File.separator+gameName); //Creates a log file inside the PlayerData directory named after the gameName
+    public PLayerData(User user){
+        File logDirectory = new File(Paths.get("").toAbsolutePath()+File.separator +"PlayerDatas"); //Creates a log file inside the PlayerData directory named after the gameName
         logFilePath = new File(logDirectory.getAbsolutePath()+File.separatorChar+user.getId()+".xml");
 
 
@@ -98,9 +97,8 @@ public class PLayerData {
 
     }
 
-    public static Player[] getAllPlayers(String gameName){
-        File logDirectory = new File(Paths.get("").toAbsolutePath()+File.separator +"PlayerDatas"
-                +File.separator+gameName);
+    public static Player[] getAllPlayers(){
+        File logDirectory = new File(Paths.get("").toAbsolutePath()+File.separator +"PlayerDatas");
         if(logDirectory.exists()){
             File[] playerLogs =logDirectory.listFiles();
             Player[] players = new Player[playerLogs.length];
