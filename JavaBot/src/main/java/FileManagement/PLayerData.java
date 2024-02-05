@@ -20,14 +20,14 @@ public class PLayerData {
 
         if(logFilePath.exists()){ // Import logDirectory file
             ObjectInputStream importLogs = null;
-            RandomAccessFile rafLog = null;
+            //RandomAccessFile rafLog = null;
             try {
-                rafLog = new RandomAccessFile(logFilePath, "r");
-                int sizeOfLog = rafLog.readInt();
-                byte[] logData = new byte[sizeOfLog];
-                rafLog.readFully(logData);
-                rafLog.close();
-                importLogs = new ObjectInputStream(new ByteArrayInputStream(logData));
+//                rafLog = new RandomAccessFile(logFilePath, "r");
+//                int sizeOfLog = rafLog.readInt();
+//                byte[] logData = new byte[sizeOfLog];
+//                rafLog.readFully(logData);
+                //rafLog.close();
+                importLogs = new ObjectInputStream(new FileInputStream(logFilePath));
                 try {
                     playerData = (Player) importLogs.readObject();
                 } catch (ClassNotFoundException e) {
@@ -40,7 +40,7 @@ public class PLayerData {
             finally {
                 try {
                     if(importLogs==null){
-                        rafLog.close();
+                        //rafLog.close();
                         return;
                     }
                     importLogs.close();
