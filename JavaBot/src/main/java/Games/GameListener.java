@@ -92,6 +92,7 @@ public class GameListener extends ListenerAdapter {
                     "!zar at -> zar atma oyunu oynarsinz\n" +
                     "!reset -> bakiyenizi baslangic degerine sifirlar\n" +
                     "!para yolla -> !para yolla [miktar] [kisi] seklinde kullanildiginda para transferi gerceklestirir. \n" +
+                    "!zenginler -> en zenginden en fakire dogru siralanan bir liste olusturur\n" +
                     "Mevcut komutlari birbiri ardina yazarak kullanabilirsiniz.").queue();
         }
         if(s.contains("EmirGod")){
