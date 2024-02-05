@@ -18,7 +18,7 @@ public class GrabPlayerData {
                 case "21" -> {
                     User user = ((SlashCommandInteractionEvent) event).getUser();
                     PLayerData blackjackData = new PLayerData(user, "21");
-                    return blackjackData.getPLayerData(user);
+                    return blackjackData.getPLayerData();
                 }
                 //more features in the future
             }
@@ -31,7 +31,7 @@ public class GrabPlayerData {
 
             User user = ((MessageReceivedEvent) event).getAuthor();
             PLayerData blackjackData = new PLayerData(user, "21");
-            return blackjackData.getPLayerData(user);
+            return blackjackData.getPLayerData();
 
         }
 

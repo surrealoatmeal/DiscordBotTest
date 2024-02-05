@@ -2,21 +2,20 @@ package Games;
 
 import net.dv8tion.jda.api.entities.User;
 
-public class Player {
-    private final User id;
+import java.io.Serializable;
+
+public class Player implements Serializable {
+    private final String id;
     private long money  = 1000;
     private String balance = money+"tl";
 
 
     public Player(User user){
-        id = user;
+        id = user.getId();
     }
 
     //GETTERS AND SETTERS
 
-    public User getId() {
-        return id;
-    }
 
     public long getMoney() {
         return money;
