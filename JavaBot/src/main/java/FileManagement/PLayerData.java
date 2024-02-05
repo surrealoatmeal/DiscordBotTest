@@ -20,13 +20,7 @@ public class PLayerData {
 
         if(logFilePath.exists()){ // Import logDirectory file
             ObjectInputStream importLogs = null;
-            //RandomAccessFile rafLog = null;
             try {
-//                rafLog = new RandomAccessFile(logFilePath, "r");
-//                int sizeOfLog = rafLog.readInt();
-//                byte[] logData = new byte[sizeOfLog];
-//                rafLog.readFully(logData);
-                //rafLog.close();
                 importLogs = new ObjectInputStream(new FileInputStream(logFilePath));
                 try {
                     playerData = (Player) importLogs.readObject();
@@ -73,7 +67,7 @@ public class PLayerData {
 
     }
 
-    private void logData(Player player){
+    public void logData(Player player){
         ObjectOutputStream logger = null;
         RandomAccessFile rafLogger = null;
         ByteArrayOutputStream byteGetter = null;

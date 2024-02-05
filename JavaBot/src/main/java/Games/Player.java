@@ -26,7 +26,7 @@ public class Player implements Serializable {
     }
 
     public void setMoney(long money) {
-        if(this.money-money <=0){
+        if(money <0){
             this.money =0;
             return;
         }
