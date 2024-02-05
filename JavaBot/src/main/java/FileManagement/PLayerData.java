@@ -7,6 +7,8 @@ import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 
 import java.io.*;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PLayerData {
     private Player playerData = null;
@@ -28,6 +30,7 @@ public class PLayerData {
                     throw new RuntimeException("Error while importing Object data!");
                 }
             } catch (IOException e) {
+                e.printStackTrace();
                 System.out.println("Something wrong happened while importing logs!");
                 throw new RuntimeException(e);
             }
@@ -93,6 +96,34 @@ public class PLayerData {
             }
         }
 
+    }
+
+    public static Player[] getAllPlayers(String gameName){
+        File logDirectory = new File(Paths.get("").toAbsolutePath()+File.separator +"PlayerDatas"
+                +File.separator+gameName);
+        if(logDirectory.exists()){
+            File[] playerLogs =logDirectory.listFiles();
+            Player[] players = new Player[playerLogs.length];
+            ObjectInputStream[] importLogs = new ObjectInputStream[playerLogs.length];
+            for(int i =0; i < importLogs.length; i++){
+                try {
+                    importLogs[i] = new ObjectInputStream(new FileInputStream(playerLogs[i]));
+                    players[i] =((Player) importLogs[i].readObject());
+                } catch (IOException e) {
+                    throw new RuntimeException("Unable to get FileInputStream in getAllPlayers();");
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException("Unable to read object in getAllPlayers();");
+                }finally {
+                    try {
+                        importLogs[i].close();
+                    } catch (IOException e) {
+                        throw new RuntimeException("Unable to close object reading in getAllPlayers();");
+                    }
+                }
+            }
+            return players;
+        }
+        return null;
     }
 
     public Player getPLayerData(){

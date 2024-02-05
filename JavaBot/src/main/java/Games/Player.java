@@ -8,10 +8,12 @@ public class Player implements Serializable {
     private final String id;
     private long money  = 1000;
     private String balance = money+"tl";
+    private String name;
 
 
     public Player(User user){
         id = user.getId();
+        name = user.getName();
     }
 
     //GETTERS AND SETTERS
@@ -23,6 +25,14 @@ public class Player implements Serializable {
 
     public String getBalance() {
         return balance;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public void setMoney(long money) {
