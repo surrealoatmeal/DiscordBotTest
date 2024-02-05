@@ -11,6 +11,9 @@ public class GrabPlayerData {
     public <T> GrabPlayerData(T event){
         userGameData(event);
     }
+    public GrabPlayerData(User user){
+        userGameData(user);
+    }
     public <T> Player userGameData(T  event){
 
         if(event.getClass() == SlashCommandInteractionEvent.class){
@@ -36,5 +39,9 @@ public class GrabPlayerData {
         }
 
         return null;
+    }
+    public Player userGameData(User user){
+        PLayerData blackjackData = new PLayerData(user, "21");
+        return blackjackData.getPLayerData();
     }
 }
