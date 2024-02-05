@@ -51,8 +51,11 @@ public class RockPaperScissors extends Game{
     }
     public void challenge(User challenged, long amount, Message m){
         MessageChannel channel = m.getChannel();
+        EmbedBuilder eb = new EmbedBuilder();
         if(player.getId().equals(challenged.getId())){
-            channel.sendMessage("Kendinizi duelloya cagiramazsiniz!").queue();
+            eb.setDescription("**Kendinizi duelloya cagiramazsiniz!**").setColor(Color.RED);
+            channel.sendMessageEmbeds(eb.build()).queue();
+            eb.clear();
             return;
         }
         PLayerData challengedData = new PLayerData(challenged);
@@ -60,17 +63,24 @@ public class RockPaperScissors extends Game{
         long playerBalance = getPlayer().getMoney();
         String challengedId = challenged.getId();
         if(playerBalance-amount<0){
-            channel.sendMessage("Yetersiz bakiye.").queue();
+            eb.setDescription("Yetersiz bakiye.").setColor(Color.RED);
+            channel.sendMessageEmbeds(eb.build()).queue();
+            eb.clear();
             return;
         }
         if(challengedBalance-amount<0){
-            channel.sendMessage(challenged.getName() +" kisisi yeterli paraya sahip degil.").queue();
+            eb.setDescription(challenged.getName() +" kisisi yeterli paraya sahip degil.").setColor(Color.RED);
+            channel.sendMessageEmbeds(eb.build()).queue();
+            eb.clear();
             return;
         }
         addChallenge(m.getAuthor(), challenged, amount);
-        channel.sendMessage("<@"+player.getId()+"> kisisi <@"+challengedId
+        eb.setTitle("**DUELLO DAVETI!**");
+        eb.setDescription("<@"+player.getId()+"> kisisi <@"+challengedId
                 +"> kisisini tas kagit makas oynamaya cagiriyor!\n" +
-                "Aktif bahis: " +amount).queue();
+                "Aktif bahis: **" +amount+"**").setColor(Color.CYAN);
+        channel.sendMessageEmbeds(eb.build()).queue();
+        eb.clear();
     }
     public static boolean checkChallenge(User Challenger, User Challenged){
         return betsAndChallenges.stream()

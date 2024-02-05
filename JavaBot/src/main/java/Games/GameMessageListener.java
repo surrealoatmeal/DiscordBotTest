@@ -78,20 +78,26 @@ public class GameMessageListener extends ListenerAdapter {
         MessageChannel channel = event.getChannel();
         DiceRoll dr = new DiceRoll(event);
         long balance = dr.getBalance();
+        EmbedBuilder eb = new EmbedBuilder();
         if(s.toLowerCase().contains("!zar at")){ //zar at
-            channel.sendMessage("Mevcut bakiyeniz:"+ dr.getBalance()+
-                    "\nOynayacaginiz para miktarini '!yatir [oynayacaginiz mikar]' seklinde belirtebilirsiniz." ).queue();
+            eb.setDescription("Mevcut bakiyeniz:"+ dr.getBalance()+
+                    "\nOynayacaginiz para miktarini '!yatir [oynayacaginiz mikar]' seklinde belirtebilirsiniz." ).setColor(Color.BLACK);
+            channel.sendMessageEmbeds(eb.build()).queue();
+            eb.clear();
             return;
         }
         if(s.toLowerCase().contains("!yatir ") || s.toLowerCase().contains("!yatır")){
             if(s.toLowerCase().contains("!yatır")){
-                s.replaceAll( "ı", "i");
+                s = s.replaceAll( "ı", "i");
             }
             StringBuilder sb = new StringBuilder(s.toLowerCase());
             int index = sb.lastIndexOf("!yatir ");
             long amount = Long.parseLong(sb.substring(index).replaceAll("[^0-9]",""));
             if(balance- amount <0){
-                channel.sendMessage("Yetersiz bakiye.").queue();
+                eb.setAuthor(event.getAuthor().getName());
+                eb.setDescription("Yetersiz bakiye.").setColor(Color.RED);
+                channel.sendMessageEmbeds(eb.build()).queue();
+                eb.clear();
             }else{
                 dr.rollDices(amount);
             }
@@ -104,8 +110,12 @@ public class GameMessageListener extends ListenerAdapter {
             int index = sb.lastIndexOf("!para yolla ");
             int mentionIndex = sb.indexOf("<@");
             long amount = Long.parseLong(sb.substring(index, mentionIndex).replaceAll("[^0-9]",""));
+            eb.setTitle("**PARA TRANSFERI**");
+
             if(dr.getBalance()-amount<0){
-                channel.sendMessage("Yetersiz bakiye.").queue();
+                eb.setDescription("Yetersiz bakiye.").setColor(Color.RED);
+                channel.sendMessageEmbeds(eb.build()).queue();
+                eb.clear();
                 return;
             }
             dr.setPlayerMoney(balance-amount);
@@ -116,9 +126,11 @@ public class GameMessageListener extends ListenerAdapter {
             godroll.setPlayerMoney(recieverBalance+amount);
             PLayerData godmode = new PLayerData(user);
             godmode.logData(godroll.getPlayer());
-            channel.sendMessage("Para transferi tamamlandi!\n" +
-                    "Gonderici <@"+event.getAuthor().getId()+"> bakiyesi: "+dr.getBalance()+"\n" +
-                    "Alici <@"+user.getId()+"> bakiyesi: " +godroll.getBalance()).queue();
+            eb.setDescription("Para transferi tamamlandi!\n" +
+                    "Gonderici <@"+event.getAuthor().getId()+"> bakiyesi: **"+dr.getBalance()+"**\n" +
+                    "Alici <@"+user.getId()+"> bakiyesi: **" +godroll.getBalance()+"**").setColor(Color.GREEN);
+            channel.sendMessageEmbeds(eb.build()).queue();
+            eb.clear();
             return;
         }
     }
