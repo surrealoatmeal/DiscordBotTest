@@ -30,23 +30,6 @@ public class GameMessageListener extends ListenerAdapter {
         invokeRPS(event);
     }
 
-  //  @Override
-//    public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
-//        invokeRPS(event);
-//    }
-
-//    public void invokeRPS(MessageReactionAddEvent event){
-//        User initiator = event.getUser();
-//        switch (event.getEmoji().getName()) { // Note: This will be renamed to getEmoji() in jda 5
-//            case "✔":
-//                RockPaperScissors rps = new RockPaperScissors(initiator, ev)
-//                break;
-//                case "❌":
-//
-//                    break;
-//            }
-//    }
-
     public void invokeRPS(MessageReceivedEvent event){
         if(event.getAuthor().isBot()) return;
         Message m = event.getMessage();
