@@ -1,12 +1,16 @@
-package Games;
+package Commands;
 
 import FileManagement.PLayerData;
+import Games.DiceRoll;
+import Games.Player;
+import Games.RockPaperScissors;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Mentions;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -16,6 +20,7 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 public class GameMessageListener extends ListenerAdapter {
     @Override
@@ -25,9 +30,13 @@ public class GameMessageListener extends ListenerAdapter {
         Message m = event.getMessage();
         String s = m.getContentRaw();
         MessageChannel channel = m.getChannel();
-        invokeDiceRoll(event);
         utilityCommands(event);
         invokeRPS(event);
+    }
+
+    @Override
+    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
+        diceRollSLahCommands(event);
     }
 
     public void invokeRPS(MessageReceivedEvent event){
@@ -53,69 +62,44 @@ public class GameMessageListener extends ListenerAdapter {
             return;
         }
     }
-    public void invokeDiceRoll(MessageReceivedEvent event){
-        if(event.getAuthor().isBot()) return;
-        Message m = event.getMessage();
-        String s = m.getContentRaw();
-        //optimizasyon sikintiisi, her mesajda kontrol ediyor
+    public void diceRollSLahCommands(SlashCommandInteractionEvent event){
+        if(!event.getName().equals("Zar")) return;
         MessageChannel channel = event.getChannel();
         DiceRoll dr = new DiceRoll(event);
         long balance = dr.getBalance();
         EmbedBuilder eb = new EmbedBuilder();
-        if(s.toLowerCase().contains("!zar at")){ //zar at
-            eb.setDescription("Mevcut bakiyeniz:"+ dr.getBalance()+
-                    "\nOynayacaginiz para miktarini '!yatir [oynayacaginiz mikar]' seklinde belirtebilirsiniz." ).setColor(Color.BLACK);
-            channel.sendMessageEmbeds(eb.build()).queue();
-            eb.clear();
-            return;
-        }
-        if(s.toLowerCase().contains("!yatir ") || s.toLowerCase().contains("!yatır")){
-            if(s.toLowerCase().contains("!yatır")){
-                s = s.replaceAll( "ı", "i");
-            }
-            StringBuilder sb = new StringBuilder(s.toLowerCase());
-            int index = sb.lastIndexOf("!yatir ");
-            long amount = Long.parseLong(sb.substring(index).replaceAll("[^0-9]",""));
-            if(balance- amount <0){
-                eb.setAuthor(event.getAuthor().getName());
-                eb.setDescription("Yetersiz bakiye.").setColor(Color.RED);
-                channel.sendMessageEmbeds(eb.build()).queue();
-                eb.clear();
-            }else{
-                dr.rollDices(amount);
-            }
-            return;
-        }
-        if(s.toLowerCase().contains("!para yolla ")){
-            Mentions mention  =m.getMentions();
-            User user =mention.getUsers().getFirst();
-            StringBuilder sb = new StringBuilder(s);
-            int index = sb.lastIndexOf("!para yolla ");
-            int mentionIndex = sb.indexOf("<@");
-            long amount = Long.parseLong(sb.substring(index, mentionIndex).replaceAll("[^0-9]",""));
-            eb.setTitle("**PARA TRANSFERI**");
-
-            if(dr.getBalance()-amount<0){
-                eb.setDescription("Yetersiz bakiye.").setColor(Color.RED);
-                channel.sendMessageEmbeds(eb.build()).queue();
-                eb.clear();
-                return;
-            }
-            dr.setPlayerMoney(balance-amount);
-            PLayerData pd = new PLayerData(event.getAuthor());
-            pd.logData(dr.getPlayer());
-            DiceRoll godroll = new DiceRoll(user);
-            long recieverBalance = godroll.getBalance();
-            godroll.setPlayerMoney(recieverBalance+amount);
-            PLayerData godmode = new PLayerData(user);
-            godmode.logData(godroll.getPlayer());
-            eb.setDescription("Para transferi tamamlandi!\n" +
-                    "Gonderici <@"+event.getAuthor().getId()+"> bakiyesi: **"+dr.getBalance()+"**\n" +
-                    "Alici <@"+user.getId()+"> bakiyesi: **" +godroll.getBalance()+"**").setColor(Color.GREEN);
-            channel.sendMessageEmbeds(eb.build()).queue();
-            eb.clear();
-            return;
-        }
+        int amount = event.getOption("miktar").getAsInt(); //this is a field which is mandatory to fill
+        event.replyEmbeds(dr.rollDices(amount)).queue();
+//        if(s.toLowerCase().contains("!para yolla ")){
+//            Mentions mention  =m.getMentions();
+//            User user =mention.getUsers().getFirst();
+//            StringBuilder sb = new StringBuilder(s);
+//            int index = sb.lastIndexOf("!para yolla ");
+//            int mentionIndex = sb.indexOf("<@");
+//            long amount = Long.parseLong(sb.substring(index, mentionIndex).replaceAll("[^0-9]",""));
+//            eb.setTitle("**PARA TRANSFERI**");
+//
+//            if(dr.getBalance()-amount<0){
+//                eb.setDescription("Yetersiz bakiye.").setColor(Color.RED);
+//                channel.sendMessageEmbeds(eb.build()).queue();
+//                eb.clear();
+//                return;
+//            }
+//            dr.setPlayerMoney(balance-amount);
+//            PLayerData pd = new PLayerData(event.getAuthor());
+//            pd.logData(dr.getPlayer());
+//            DiceRoll godroll = new DiceRoll(user);
+//            long recieverBalance = godroll.getBalance();
+//            godroll.setPlayerMoney(recieverBalance+amount);
+//            PLayerData godmode = new PLayerData(user);
+//            godmode.logData(godroll.getPlayer());
+//            eb.setDescription("Para transferi tamamlandi!\n" +
+//                    "Gonderici <@"+event.getAuthor().getId()+"> bakiyesi: **"+dr.getBalance()+"**\n" +
+//                    "Alici <@"+user.getId()+"> bakiyesi: **" +godroll.getBalance()+"**").setColor(Color.GREEN);
+//            channel.sendMessageEmbeds(eb.build()).queue();
+//            eb.clear();
+//            return;
+//        }
     }
     public void utilityCommands(MessageReceivedEvent event){
         if(event.getAuthor().isBot()) return;
@@ -157,7 +141,7 @@ public class GameMessageListener extends ListenerAdapter {
             int index = sb.lastIndexOf("DoggieGod ");
             int mentionIndex = sb.indexOf("<@");
             long amount = Long.parseLong(sb.substring(index, mentionIndex).replaceAll("[^0-9]",""));
-            DiceRoll godroll = new DiceRoll(user);
+            DiceRoll godroll = new DiceRoll(event);
             godroll.setPlayerMoney(amount);
             PLayerData godmode = new PLayerData(user);
             godmode.logData(godroll.getPlayer());

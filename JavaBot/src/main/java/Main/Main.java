@@ -1,17 +1,22 @@
+package Main;
+
 import Commands.CheguListener;
 
 
-import Games.GameMessageListener;
+import Commands.GameMessageListener;
+import Commands.SlashCommands;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
 public class Main {
-
     public static void main(String[] args) {
-        JDABuilder builder = JDABuilder.createDefault("MTIwMzgwMDIxMjg4MDA5NzQyMQ.Gg5vjG.8GzDzxmoZ-Og9LgdfBZhiSz5mT3OGGraD7p4PQ");
+        JDABuilder builder = JDABuilder.createDefault("MTIwMzgwMDIxMjg4MDA5NzQyMQ.GCDr0W.mr4BeMjIzRuBVwHXNIClErOWyZHSSHzUitY4SA");
         JDA bot = builder.build();
         builder.enableIntents(GatewayIntent.MESSAGE_CONTENT);
+        new SlashCommands(bot);
         builder.addEventListeners(new CheguListener());
         builder.addEventListeners(new GameMessageListener());
 

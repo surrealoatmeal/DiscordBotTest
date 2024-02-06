@@ -2,8 +2,10 @@ package Games;
 
 import FileManagement.PLayerData;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.awt.*;
@@ -13,27 +15,30 @@ public class DiceRoll extends Game{
     private PLayerData pLayerData;
     private Player player;
 
-    public <T extends MessageReceivedEvent> DiceRoll(T event) {
-        super(event);
-        pLayerData = new PLayerData(event.getAuthor());
+    public DiceRoll(MessageReceivedEvent messageEvent) {
+        super(messageEvent);
+        pLayerData = new PLayerData(messageEvent.getAuthor());
         player = getPlayer();
     }
-    public <T extends MessageReceivedEvent> DiceRoll(User user){
-        super(user);
-        pLayerData = new PLayerData(user);
+    public DiceRoll(SlashCommandInteractionEvent slashEvent){
+        super(slashEvent);
+        pLayerData = new PLayerData(slashEvent.getUser());
         player = getPlayer();
     }
 
-    public void rollDices(long bet){
-
+    public MessageEmbed rollDices(long bet){
+        long balance = getMoney();
+        if(balance-bet<0) return stringToEmbed("","","**Yetersiz Bakiye**", Color.red);
         int dice1 = new Random().nextInt(1,6);
         int dice2 = new Random().nextInt(1,6);
-        MessageChannel channel = event.getChannel();
+
         String[] emojiArray = new String[]{":zero:",":one:",":two:",":three:",":four:",":five:",":six:"};
         String output = "Ilk zarin degeri: "+emojiArray[dice1] +"\n2. zarin degeri: " + emojiArray[dice2];
-        long balance = getMoney()-bet;
+        balance-=bet;
         byte hasWon = 0;
 
+        String title;
+        Color embedColor;
         if(dice1 == dice2){
             switch (dice1){
                 case 6->{setPlayerMoney(balance+bet*6);
@@ -64,21 +69,18 @@ public class DiceRoll extends Game{
             output+= "\nKaybedilen miktar: **" +bet+"**";
             hasWon--;
         }
-        EmbedBuilder eb = new EmbedBuilder();
         if(hasWon<0){
-            eb.setTitle("**KAYBETTINIZ**").setColor(Color.RED);
+            title= "**KAYBETTINIZ**";
+            embedColor = Color.RED;
         }else if(hasWon>0){
-            eb.setTitle("**JACKPOT**").setColor(Color.YELLOW);
+            title = "**JACKPOT**";
+            embedColor = Color.YELLOW;
         }else {
-            eb.setTitle("**KAZANDINIZ**").setColor(Color.GREEN);
+            title ="**KAZANDINIZ**";
+            embedColor = Color.GREEN;
         }
-
-        balance = getPlayer().getMoney();
-        eb.setDescription(output +"\n\nYeni bakiyeniz: **" +balance+"**\n");
-        eb.setAuthor(player.getName());
-        channel.sendMessageEmbeds(eb.build()).queue();
-        eb.clear();
         pLayerData.logData(player);
+        return stringToEmbed(title, player.getName(),output +"\n\nYeni bakiyeniz: **" +balance+"**\n", embedColor );
     }
 
     public long getBalance(){
