@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -108,17 +107,17 @@ public class RockPaperScissors extends Game{
 
     public void play(User challenger, Message m, long bet){
         PLayerData challengerData = new PLayerData(challenger); //to load the files
-        Player challengerPLayer = new Player(challenger);
+        Player challengerPLayer = challengerData.getPLayerData();
         long challengerBalance = challengerPLayer.getMoney();
         long challengedBalance = player.getMoney();
 
-        String[] rps = new String[]{":rock:", ":scroll:", ":scissors:"};
+        String[] rps = new String[]{":rock:", ":scissors:", ":scroll:"};
         MessageChannel channel = m.getChannel();
         //subtract balance
-        challengerBalance=challengerBalance -bet;
-        challengedBalance =challengedBalance-bet;
-        challengerData.logData(challengerPLayer);
-        pLayerData.logData(player);
+        challengerBalance -= bet;
+        challengedBalance -= bet;
+//        challengerData.logData(challengerPLayer);
+//        pLayerData.logData(player);
         int challengerTurn = new Random().nextInt(0,2);
         int challengedTurn = new Random().nextInt(0,2);
 
@@ -127,15 +126,18 @@ public class RockPaperScissors extends Game{
                 player.getName()+"** "+ rps[challengedTurn]+" yapti!\n";
         if(challengedTurn==challengerTurn){
             eb.setTitle("**BERABERE!**");
+            challengedBalance +=bet;
+            challengerBalance +=bet;
         }else if(gameResult(challengerTurn, challengedTurn)){
-            challengedBalance =challengedBalance +2*bet;
+            challengerBalance +=2*bet;
             eb.setTitle("**"+challengerPLayer.getName()+ " KAZANDI!**\n").setColor(Color.MAGENTA);
         }else{
-            challengerBalance =challengerBalance + 2*bet;
+            challengedBalance +=2*bet;
             eb.setTitle("**"+player.getName()+ " KAZANDI!**\n").setColor(Color.MAGENTA);
         }
         player.setMoney(challengedBalance);
         challengerPLayer.setMoney(challengerBalance);
+
         challengerData.logData(challengerPLayer);
         pLayerData.logData(player);
         eb.setDescription(outputMessage+ "**"+challenger.getName() +"** yeni bakiye: **" +challengerBalance +"**\n" +
@@ -145,7 +147,7 @@ public class RockPaperScissors extends Game{
     }
     private boolean gameResult(int challenger, int challenged){
         //true if challenged wins, false if challenged looses
-        return challenger != challenged % 2;
+        return challenged-challenger > 0;
     }
 
     //GETTER AND SETTER

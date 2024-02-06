@@ -16,6 +16,7 @@ public class Player implements Serializable {
         name = user.getName();
     }
 
+
     //GETTERS AND SETTERS
 
 
@@ -38,6 +39,7 @@ public class Player implements Serializable {
     public void setMoney(long money) {
         if(money <0){
             this.money =0;
+
             return;
         }
         this.money = money;
