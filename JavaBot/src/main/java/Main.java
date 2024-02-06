@@ -9,7 +9,8 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 public class Main {
 
     public static void main(String[] args) {
-        JDABuilder builder = JDABuilder.createDefault("MTIwMzgwMDIxMjg4MDA5NzQyMQ.Gg5vjG.8GzDzxmoZ-Og9LgdfBZhiSz5mT3OGGraD7p4PQ");
+        String apiKey = System.getenv("DISCORD_API_KEY");
+        JDABuilder builder = JDABuilder.createDefault(apiKey);
         JDA bot = builder.build();
         builder.enableIntents(GatewayIntent.MESSAGE_CONTENT);
         builder.addEventListeners(new CheguListener());
